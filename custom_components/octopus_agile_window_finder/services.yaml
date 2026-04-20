@@ -1,0 +1,3 @@
+update_windows:
+  name: Update Best Windows
+  description: Manually forces the integration to recalculate the best windows for all appliances.

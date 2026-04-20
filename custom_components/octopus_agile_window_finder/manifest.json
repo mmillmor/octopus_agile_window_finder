@@ -1,10 +1,11 @@
 {
   "domain": "octopus_agile_window_finder",
   "name": "Octopus Best Window Finder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "documentation": "https://github.com/mmillmor/octopus_agile_window_finder",
   "issue_tracker": "https://github.com/mmillmor/octopus_agile_window_finder/issues",
   "codeowners": ["@mmillmor"],
+  "config_flow": true,
   "iot_class": "local_push",
   "requirements": []
 }

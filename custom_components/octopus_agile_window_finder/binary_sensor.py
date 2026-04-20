@@ -4,6 +4,8 @@ import homeassistant.util.dt as dt_util
 from datetime import timedelta
 from .const import DOMAIN, CONF_RUN_HOURS, CONF_NAME
 
+SCAN_INTERVAL = timedelta(hours=24) 
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
     if config_entry.data.get("enable_binary"):
         async_add_entities([OctopusWindowActiveSensor(hass, config_entry)], True)
@@ -15,6 +17,10 @@ class OctopusWindowActiveSensor(BinarySensorEntity):
         self._name = self._config[CONF_NAME]
         self._attr_name = f"{self._name} Window Active"
         self._attr_unique_id = f"{config_entry.entry_id}_active"
+
+    @property
+    def icon(self):
+        return "mdi:power"
 
     @property
     def is_on(self):

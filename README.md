@@ -18,7 +18,7 @@ A Home Assistant integration to find the cheapest adjacent electricity slots for
 5. Restart Home Assistant.
 
 ### Manual
-1. Copy the `octopus_window_finder` folder to your `custom_components` directory.
+1. Copy the `octopus_agile_window_finder` folder to your `custom_components` directory.
 2. Restart Home Assistant.
 
 ## Configuration

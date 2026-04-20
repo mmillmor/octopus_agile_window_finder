@@ -54,34 +54,36 @@ class OctopusOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        # We pull current values from both .options (previously edited) 
-        # and .data (original setup) to pre-fill the form correctly.
+        def get_val(key):
+            return self.config_entry.options.get(key, self.config_entry.data.get(key))
+
+        # Build optional time fields only if a value exists — passing None as a
+        # default to TimeSelector causes a 400 when the form loads.
+        schema_dict = {
+            vol.Required(
+                CONF_RUN_HOURS,
+                default=get_val(CONF_RUN_HOURS)
+            ): vol.Coerce(float),
+            vol.Required(
+                CONF_TOTAL_KWH,
+                default=get_val(CONF_TOTAL_KWH)
+            ): vol.Coerce(float),
+        }
+
+        min_start = get_val(CONF_MIN_START)
+        max_end = get_val(CONF_MAX_END)
+
+        if min_start is not None:
+            schema_dict[vol.Optional(CONF_MIN_START, default=min_start)] = selector.TimeSelector({})
+        else:
+            schema_dict[vol.Optional(CONF_MIN_START)] = selector.TimeSelector({})
+
+        if max_end is not None:
+            schema_dict[vol.Optional(CONF_MAX_END, default=max_end)] = selector.TimeSelector({})
+        else:
+            schema_dict[vol.Optional(CONF_MAX_END)] = selector.TimeSelector({})
+
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema({
-                vol.Required(
-                    CONF_RUN_HOURS, 
-                    default=self.config_entry.options.get(
-                        CONF_RUN_HOURS, self.config_entry.data.get(CONF_RUN_HOURS)
-                    )
-                ): vol.Coerce(float),
-                vol.Required(
-                    CONF_TOTAL_KWH, 
-                    default=self.config_entry.options.get(
-                        CONF_TOTAL_KWH, self.config_entry.data.get(CONF_TOTAL_KWH)
-                    )
-                ): vol.Coerce(float),
-                vol.Optional(
-                    CONF_MIN_START, 
-                    default=self.config_entry.options.get(
-                        CONF_MIN_START, self.config_entry.data.get(CONF_MIN_START)
-                    )
-                ): selector.TimeSelector({"nullable": True}),
-                vol.Optional(
-                    CONF_MAX_END, 
-                    default=self.config_entry.options.get(
-                        CONF_MAX_END, self.config_entry.data.get(CONF_MAX_END)
-                    )
-                ): selector.TimeSelector({"nullable": True}),
-            })
+            data_schema=vol.Schema(schema_dict)
         )

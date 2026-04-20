@@ -13,8 +13,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class OctopusWindowActiveSensor(BinarySensorEntity):
     def __init__(self, hass, config_entry):
         self._hass = hass
-        self._config = config_entry.data
-        self._name = self._config[CONF_NAME]
+        self._config_entry = config_entry  
+        self._name = config_entry.data[CONF_NAME]
         self._attr_name = f"{self._name} Window Active"
         self._attr_unique_id = f"{config_entry.entry_id}_active"
 
@@ -32,7 +32,7 @@ class OctopusWindowActiveSensor(BinarySensorEntity):
             return False
 
         start_dt = dt_util.parse_datetime(state.attributes["start_time"])
-        duration = timedelta(hours=self._config[CONF_RUN_HOURS])
+        duration = timedelta(hours=self._config_entry.data[CONF_RUN_HOURS])
         now = dt_util.now()
 
         return start_dt <= now <= (start_dt + duration)

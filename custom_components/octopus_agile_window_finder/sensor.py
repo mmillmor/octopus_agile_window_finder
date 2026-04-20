@@ -37,8 +37,8 @@ def is_in_time_window(check_time, min_t, max_t):
 class OctopusBestWindowSensor(SensorEntity):
     def __init__(self, hass, config_entry):
         self._hass = hass
-        self._config = config_entry.data
-        self._name = self._config[CONF_NAME]
+        self._config_entry = config_entry 
+        self._name = config_entry.data[CONF_NAME]
         # This creates "sensor.dishwasher_best_window"
         self._attr_name = f"{self._name} Best Window"
         self._attr_unique_id = f"{config_entry.entry_id}_window"
@@ -56,10 +56,18 @@ class OctopusBestWindowSensor(SensorEntity):
         return "mdi:clock-outline"
 
     def update(self):
+
+        conf = {**self._config_entry.data, **self._config_entry.options}
+        
+        current_entity = conf.get(CONF_CURRENT_ENTITY)
+        future_entity = conf.get(CONF_FUTURE_ENTITY)
+        run_hours = conf.get(CONF_RUN_HOURS)
+        total_kwh = conf.get(CONF_TOTAL_KWH)
+
         _LOGGER.debug("Starting update for %s", self._name)
-        current_state = self._hass.states.get(self._config[CONF_CURRENT_ENTITY])
+        current_state = self._hass.states.get(current_entity)
         _LOGGER.debug("Current state fetched: %s", current_state)
-        future_state = self._hass.states.get(self._config[CONF_FUTURE_ENTITY])
+        future_state = self._hass.states.get(future_entity)
         
         current_rates = []
         if current_state and current_state.attributes.get("rates"):
@@ -76,7 +84,7 @@ class OctopusBestWindowSensor(SensorEntity):
 
         all_rates = current_rates + future_rates
 
-        slots_needed = math.ceil(self._config[CONF_RUN_HOURS] * 2)
+        slots_needed = math.ceil(run_hours * 2)
         if len(all_rates) < slots_needed:
             _LOGGER.debug("Not enough rates available: %s needed, %s available", slots_needed, len(all_rates))
             self._state = "Waiting for rates"
@@ -85,8 +93,8 @@ class OctopusBestWindowSensor(SensorEntity):
         now = dt_util.now()
         best_sum, best_start = float('inf'), None
 
-        min_val = self._config.get(CONF_MIN_START)
-        max_val = self._config.get(CONF_MAX_END)
+        min_val = conf.get(CONF_MIN_START)
+        max_val = conf.get(CONF_MAX_END)
 
         min_t = time.fromisoformat(min_val) if min_val else None
         max_t = time.fromisoformat(max_val) if max_val else None
@@ -129,7 +137,7 @@ class OctopusBestWindowSensor(SensorEntity):
         if best_start:
             self._state = best_start.strftime("%I:%M %p").lower()
             # Calculate run cost
-            total_cost = (best_sum / 2*slots_needed) * self._config[CONF_TOTAL_KWH]
+            total_cost = (best_sum / slots_needed) * total_kwh
             self._attributes = {
                 "start_time": best_start.isoformat(),
                 "estimated_cost_pence": round(total_cost * 100, 2),

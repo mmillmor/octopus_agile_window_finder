@@ -22,18 +22,6 @@ def parse_time(time_str):
     except (ValueError, TypeError):
         return None
 
-def is_in_time_window(check_time, min_t, max_t):
-    if min_t is None or max_t is None:
-        return True
-
-    # Standard window (e.g., 09:00 to 17:00)
-    if min_t <= max_t:
-        return min_t <= check_time <= max_t
-    
-    # Midnight spanning window (e.g., 22:00 to 05:00)
-    return check_time >= min_t or check_time <= max_t
-
-
 class OctopusBestWindowSensor(SensorEntity):
     def __init__(self, hass, config_entry):
         self._hass = hass
@@ -104,6 +92,7 @@ class OctopusBestWindowSensor(SensorEntity):
             window = all_rates[i : i + slots_needed]
             
             raw_start = window[0].get("start")
+            raw_end = window[-1].get("end")  # <-- grab the window's end slot
 
             if isinstance(raw_start, datetime):
                 start_dt = raw_start
@@ -118,12 +107,30 @@ class OctopusBestWindowSensor(SensorEntity):
             if start_dt.tzinfo is None:
                 start_dt = start_dt.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
 
-            # 1. Future only
+            # Parse the end of the last slot
+            if isinstance(raw_end, datetime):
+                end_dt = raw_end
+            elif isinstance(raw_end, str):
+                end_dt = dt_util.parse_datetime(raw_end)
+            else:
+                continue
+
+            if end_dt is not None and end_dt.tzinfo is None:
+                end_dt = end_dt.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
+
+            # 1. Entire window must be in the future
             if start_dt <= now:
                 continue
-                
-            if not is_in_time_window(start_dt.time(), min_t, max_t):
-                continue
+
+            # 2. The window must END by max_t, not just START within it
+            if max_t is not None and end_dt is not None:
+                if end_dt.time() > max_t:
+                    continue
+
+            # 3. Start must be at or after min_t
+            if min_t is not None:
+                if start_dt.time() < min_t:
+                    continue
 
             try:
                 current_sum = sum(slot.get("value_inc_vat", 999) for slot in window)

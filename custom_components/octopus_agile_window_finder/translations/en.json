@@ -1,0 +1,78 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add an appliance",
+        "description": "Find the cheapest Octopus Agile times to run an appliance.",
+        "data": {
+          "name": "Appliance name",
+          "current_entity": "Today's rates",
+          "future_entity": "Tomorrow's rates",
+          "mode": "Scheduling mode",
+          "run_hours": "Run time",
+          "min_block_hours": "Minimum block length",
+          "total_kwh": "Energy used",
+          "min_start": "Earliest start",
+          "max_end": "Latest finish",
+          "enable_binary": "Create 'window active' sensor"
+        },
+        "data_description": {
+          "name": "Used to name the sensors, e.g. sensor.<name>_best_window.",
+          "current_entity": "The Octopus Energy 'Current Day Rates' event entity for your import meter.",
+          "future_entity": "The Octopus Energy 'Next Day Rates' event entity. It fills in after about 4pm.",
+          "mode": "Run in one continuous block, or pick the cheapest half-hours each day.",
+          "run_hours": "How long the appliance needs to run. In 'cheapest slots' mode this is the total per day (or per allowed time range).",
+          "min_block_hours": "'Cheapest slots' mode only: shortest time to run in one go, so it isn't switched every half hour. Leave empty for half-hour blocks.",
+          "total_kwh": "Total kWh used over the full run time, used to estimate the cost.",
+          "min_start": "Optional. Only run after this time of day.",
+          "max_end": "Optional. Must finish by this time of day. Can be earlier than the earliest start for overnight ranges, e.g. 22:00 to 06:00.",
+          "enable_binary": "Adds a binary sensor that is on while the appliance should be running. Use it to trigger automations."
+        }
+      }
+    },
+    "error": {
+      "min_block_too_long": "The minimum block length can't be longer than the run time."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Appliance settings",
+        "description": "Changes apply straight away; the plan is recalculated.",
+        "data": {
+          "current_entity": "Today's rates",
+          "future_entity": "Tomorrow's rates",
+          "mode": "Scheduling mode",
+          "run_hours": "Run time",
+          "min_block_hours": "Minimum block length",
+          "total_kwh": "Energy used",
+          "min_start": "Earliest start",
+          "max_end": "Latest finish",
+          "enable_binary": "Create 'window active' sensor"
+        },
+        "data_description": {
+          "current_entity": "The Octopus Energy 'Current Day Rates' event entity for your import meter.",
+          "future_entity": "The Octopus Energy 'Next Day Rates' event entity. It fills in after about 4pm.",
+          "mode": "Run in one continuous block, or pick the cheapest half-hours each day.",
+          "run_hours": "How long the appliance needs to run. In 'cheapest slots' mode this is the total per day (or per allowed time range).",
+          "min_block_hours": "'Cheapest slots' mode only: shortest time to run in one go, so it isn't switched every half hour. Leave empty for half-hour blocks.",
+          "total_kwh": "Total kWh used over the full run time, used to estimate the cost.",
+          "min_start": "Optional. Only run after this time of day.",
+          "max_end": "Optional. Must finish by this time of day. Can be earlier than the earliest start for overnight ranges, e.g. 22:00 to 06:00.",
+          "enable_binary": "Adds a binary sensor that is on while the appliance should be running. Use it to trigger automations."
+        }
+      }
+    },
+    "error": {
+      "min_block_too_long": "The minimum block length can't be longer than the run time."
+    }
+  },
+  "selector": {
+    "mode": {
+      "options": {
+        "window": "Continuous block: the cheapest single window (e.g. dishwasher, car)",
+        "slots": "Cheapest slots: the cheapest half-hours each day, not necessarily together (e.g. pool pump)"
+      }
+    }
+  }
+}
